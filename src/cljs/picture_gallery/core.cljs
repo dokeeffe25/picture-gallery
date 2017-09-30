@@ -6,10 +6,27 @@
             [picture-gallery.ajax :refer [load-interceptors!]]
             [picture-gallery.components.common :as common]
             [picture-gallery.components.registration :as registration]
-            [reagent.core :as r]
+            [reagent.core :as reagent]
             [reagent.session :as session]
             [secretary.core :as secretary :include-macros true])
   (:import goog.History))
+
+
+(defn modal []
+  (when-let [session-modal (session/get :modal)]
+    [session-modal]))
+
+
+(defn user-menu []
+  (if-let [id (session/get :identity)]
+    [:ul.nav.navbar-nav.pull-right
+     [:li.nav-item
+      [:a.dropdown-item.btn
+       {:on-click #(session/remove! :identity)}
+       [:i.fa.fa-user] " " id " | sign out"]]]
+    [:ul.nav.navbar-nav.pull-right
+     [:li.nav-item [registration/registration-button]]]))
+
 
 (defn nav-link [uri title page collapsed?]
   [:li.nav-item
@@ -18,10 +35,11 @@
     {:href uri
      :on-click #(reset! collapsed? true)} title]])
 
+
 (defn navbar []
-  (let [collapsed? (r/atom true)]
+  (let [collapsed? (reagent/atom [])]
     (fn []
-      [:nav.navbar.navbar-dark.bg-primary
+      [:nav.navbar.navbar-light.bg-faded
        [:button.navbar-toggler.hidden-sm-up
         {:on-click #(swap! collapsed? not)} "☰"]
        [:div.collapse.navbar-toggleable-xs
@@ -29,13 +47,16 @@
         [:a.navbar-brand {:href "#/"} "picture-gallery"]
         [:ul.nav.navbar-nav
          [nav-link "#/" "Home" :home collapsed?]
-         [nav-link "#/about" "About" :about collapsed?]]]])))
+         [nav-link "#/" "About" :about collapsed?]
+         [user-menu]]]])))
+
 
 (defn about-page []
   [:div.container
    [:div.row
     [:div.col-md-12
      [:img {:src (str js/context "/img/warning_clojure.png")}]]]])
+
 
 (defn home-page []
   [:div.container
@@ -44,24 +65,30 @@
       [:div {:dangerouslySetInnerHTML
              {:__html (md->html docs)}}]])])
 
+
 (def pages
   {:home #'home-page
    :about #'about-page})
 
+
 (defn page []
   [:div
-   [registration/registration-form]
+   [modal]
    [(pages (session/get :page))]])
+
 
 ;; -------------------------
 ;; Routes
 (secretary/set-config! :prefix "#")
 
+
 (secretary/defroute "/" []
   (session/put! :page :home))
 
+
 (secretary/defroute "/about" []
   (session/put! :page :about))
+
 
 ;; -------------------------
 ;; History
@@ -74,14 +101,17 @@
               (secretary/dispatch! (.-token event))))
         (.setEnabled true)))
 
+
 ;; -------------------------
 ;; Initialize app
 (defn fetch-docs! []
   (GET "/docs" {:handler #(session/put! :docs %)}))
 
+
 (defn mount-components []
-  (r/render [#'navbar] (.getElementById js/document "navbar"))
-  (r/render [#'page] (.getElementById js/document "app")))
+  (reagent/render [#'navbar] (.getElementById js/document "navbar"))
+  (reagent/render [#'page] (.getElementById js/document "app")))
+
 
 (defn init! []
   (load-interceptors!)

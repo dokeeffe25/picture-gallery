@@ -1,11 +1,11 @@
 (ns picture-gallery.db.core
   (:require
-    [cheshire.core :refer [generate-string parse-string]]
-    [clj-time.jdbc]
-    [clojure.java.jdbc :as jdbc]
-    [conman.core :as conman]
-    [picture-gallery.config :refer [env]]
-    [mount.core :refer [defstate]])
+   [cheshire.core :refer [generate-string parse-string]]
+   [clj-time.jdbc]
+   [clojure.java.jdbc :as jdbc]
+   [conman.core :as conman]
+   [picture-gallery.config :refer [env]]
+   [mount.core :refer [defstate]])
   (:import org.postgresql.util.PGobject
            java.sql.Array
            clojure.lang.IPersistentMap
@@ -14,11 +14,11 @@
             BatchUpdateException
             PreparedStatement]))
 
-(env :database-url)
 
 (defstate ^:dynamic *db*
            :start (conman/connect! {:jdbc-url (env :database-url)})
            :stop (conman/disconnect! *db*))
+
 
 (conman/bind-connection *db* "sql/queries.sql")
 
@@ -26,7 +26,6 @@
 (extend-protocol jdbc/IResultSetReadColumn
   Array
   (result-set-read-column [v _ _] (vec (.getArray v)))
-
   PGobject
   (result-set-read-column [pgobj _metadata _index]
     (let [type  (.getType pgobj)
@@ -37,10 +36,12 @@
         "citext" (str value)
         value))))
 
+
 (defn to-pg-json [value]
       (doto (PGobject.)
             (.setType "jsonb")
             (.setValue (generate-string value))))
+
 
 (extend-type clojure.lang.IPersistentVector
   jdbc/ISQLParameter
@@ -51,6 +52,7 @@
       (if-let [elem-type (when (= (first type-name) \_) (apply str (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
         (.setObject stmt idx (to-pg-json v))))))
+
 
 (extend-protocol jdbc/ISQLValue
   IPersistentMap
