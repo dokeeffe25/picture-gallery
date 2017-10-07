@@ -7,6 +7,18 @@
             [reagent.session :as session]))
 
 
+(def timeout-ms (* 1000 60 30))
+
+
+(defn session-timer []
+  (when (session/get :identity)
+    (if (session/get :user-event)
+      (do
+        (session/remove! :user-event)
+        (js/setTimeout #(session-timer) timeout-ms))
+      (session/remove! :identity))))
+
+
 (defn encode-auth [user pass]
   (->> (str user ":" pass)
        (b64/encodeString)
@@ -21,6 +33,7 @@
          :handler #(do
                      (session/remove! :modal)
                      (session/put! :identity id)
+                     (js/setTimeout session-timer timeout-ms)
                      (reset! fields nil))
          :error-handler #(reset! error (get-in % [:response :message]))})))
 

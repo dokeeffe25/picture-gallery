@@ -2,7 +2,7 @@
   (:require [picture-gallery.env :refer [defaults]]
             [cognitect.transit :as transit]
             [clojure.tools.logging :as log]
-            [picture-gallery.layout :refer [*app-context* error-page]]
+            [picture-gallery.layout :refer [*app-context* *identity* error-page]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.webjars :refer [wrap-webjars]]
             [muuntaja.core :as muuntaja]
@@ -93,11 +93,17 @@
         (wrap-authentication backend)
         (wrap-authorization backend))))
 
+(defn wrap-identity [handler]
+  (fn [request]
+    (binding [*identity* (get-in request [:session :identity])]
+      (handler request))))
+
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-auth
       wrap-webjars
       wrap-flash
+      wrap-identity
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
         (-> site-defaults

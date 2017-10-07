@@ -26,7 +26,6 @@
   (if (validation/registration-errors user)
     (http-response/precondition-failed {:result :error})
     (try
-      (log/info "HERE")
       (db/create-user!
        (-> user
            (dissoc :pass-confirm)
