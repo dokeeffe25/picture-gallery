@@ -1,10 +1,11 @@
 (ns picture-gallery.core
-  (:require [ajax.core :refer [GET POST]]
+  (:require [ajax.core :as ajax :refer [GET POST]]
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
             [picture-gallery.ajax :refer [load-interceptors!]]
             [picture-gallery.components.common :as common]
+            [picture-gallery.components.login :as login]
             [picture-gallery.components.registration :as registration]
             [reagent.core :as reagent]
             [reagent.session :as session]
@@ -22,9 +23,11 @@
     [:ul.nav.navbar-nav.pull-right
      [:li.nav-item
       [:a.dropdown-item.btn
-       {:on-click #(session/remove! :identity)}
+       {:on-click #(ajax/POST "/logout"
+                       {:handler (fn [] (session/remove! :identity))})}
        [:i.fa.fa-user] " " id " | sign out"]]]
     [:ul.nav.navbar-nav.pull-right
+     [:li.nav-item [login/login-button]]
      [:li.nav-item [registration/registration-button]]]))
 
 
