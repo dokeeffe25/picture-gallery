@@ -7,6 +7,7 @@
             [picture-gallery.components.common :as common]
             [picture-gallery.components.login :as login]
             [picture-gallery.components.registration :as registration]
+            [picture-gallery.components.upload :as upload]
             [reagent.core :as reagent]
             [reagent.session :as session]
             [secretary.core :as secretary :include-macros true])
@@ -21,6 +22,7 @@
 (defn user-menu []
   (if-let [id (session/get :identity)]
     [:ul.nav.navbar-nav.pull-right
+     [:li.nav-item [upload/upload-button]]
      [:li.nav-item
       [:a.dropdown-item.btn
        {:on-click #(ajax/POST "/logout"
