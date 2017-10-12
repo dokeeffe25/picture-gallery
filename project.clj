@@ -128,8 +128,8 @@
                      {:output-to "target/test.js"
                       :main "picture-gallery.doo-runner"
                       :optimizations :whitespace
-                      :pretty-print true}}}}
+                      :pretty-print true}}}}}
                   
-                  }
+
    :profiles/dev {}
    :profiles/test {}})

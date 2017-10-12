@@ -5,14 +5,21 @@
             [compojure.api.sweet :refer :all]
             [compojure.api.upload :as api.upload]
             [picture-gallery.routes.services.auth :as auth]
+            [picture-gallery.routes.services.gallery :as gallery]
             [picture-gallery.routes.services.upload :as upload]
             [ring.util.http-response :refer :all]
             [schema.core :as s]))
+
 
 (s/defschema UserRegistration
   {:id           String
    :pass         String
    :pass-confirm String})
+
+
+(s/defschema Gallery
+  {:owner String
+   :name  String})
 
 
 (s/defschema Result
@@ -40,10 +47,10 @@
 
 
 (defapi service-routes
-  {:swagger {:ui "/swagger-ui"
+  {:swagger {:ui   "/swagger-ui"
              :spec "/swagger.json"
-             :data {:info {:version "1.0.0"
-                           :title "Picture Gallery API"
+             :data {:info {:version     "1.0.0"
+                           :title       "Picture Gallery API"
                            :description "Public Services"}}}}
   (POST "/register" req
     :return Result
@@ -58,14 +65,23 @@
   (POST "/logout" []
     :summary "remove user session"
     :return Result
-    (auth/logout!)))
+    (auth/logout!))
+  (GET "/gallery/:owner/:name" []
+    :summary "display user"
+    :path-params [owner :- String name :- String]
+    (gallery/get-image owner name))
+  (GET "/list-thumbnails/:owner" []
+    :path-params [owner :- String]
+    :summary "list thumbnails for images in the gallery"
+    :return [Gallery]
+    (gallery/list-thumbnails owner)))
 
 
 (defapi restricted-service-routes
-  {:swagger {:ui "/swagger-ui-private"
+  {:swagger {:ui   "/swagger-ui-private"
              :spec "/swagger-private.json"
-             :data {:info {:version "1.0.0"
-                           :title "Picture Gallery API"
+             :data {:info {:version     "1.0.0"
+                           :title       "Picture Gallery API"
                            :description "Private Services"}}}}
   (POST "/upload" req
     :multipart-params [file :- api.upload/TempFileUpload]
