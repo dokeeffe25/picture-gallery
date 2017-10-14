@@ -62,74 +62,76 @@
   
 
   :profiles
-  {:uberjar {:omit-source true
-             :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
-             :cljsbuild
-             {:builds
-              {:min
-               {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
-                :compiler
-                {:output-to "target/cljsbuild/public/js/app.js"
-                 :optimizations :advanced
-                 :pretty-print false
-                 :closure-warnings
-                 {:externs-validation :off :non-standard-jsdoc :off}
-                 :externs ["react/externs/react.js"]}}}}
-             
-             
-             :aot :all
-             :uberjar-name "picture-gallery.jar"
-             :source-paths ["env/prod/clj"]
-             :resource-paths ["env/prod/resources"]}
+  {:uberjar       {:omit-source    true
+                   :prep-tasks     ["compile" ["cljsbuild" "once" "min"]]
+                   :cljsbuild
+                                   {:builds
+                                    {:min
+                                     {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
+                                      :compiler
+                                                    {:output-to     "target/cljsbuild/public/js/app.js"
+                                                     :optimizations :advanced
+                                                     :pretty-print  true
+                                                     :closure-warnings
+                                                                    {:externs-validation :off :non-standard-jsdoc :off}
+                                                     :externs       ["react/externs/react.js"
+                                                                     "resources/public/vendor/js/color.js"]}}}}
+
+
+
+                   :aot            :all
+                   :uberjar-name   "picture-gallery.jar"
+                   :source-paths   ["env/prod/clj"]
+                   :resource-paths ["env/prod/resources"]}
 
    :dev           [:project/dev :profiles/dev]
    :test          [:project/dev :project/test :profiles/test]
 
-   :project/dev  {:dependencies [[prone "1.1.4"]
-                                 [ring/ring-mock "0.3.1"]
-                                 [ring/ring-devel "1.6.2"]
-                                 [pjstadig/humane-test-output "0.8.2"]
-                                 [binaryage/devtools "0.9.4"]
-                                 [com.cemerick/piggieback "0.2.2"]
-                                 [doo "0.1.7"]
-                                 [figwheel-sidecar "0.5.13"]]
-                  :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
-                                 [lein-doo "0.1.7"]
-                                 [lein-figwheel "0.5.13"]
-                                 [org.clojure/clojurescript "1.9.908"]]
-                  :cljsbuild
-                  {:builds
-                   {:app
-                    {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-                     :figwheel {:on-jsload "picture-gallery.core/mount-components"}
-                     :compiler
-                     {:main "picture-gallery.app"
-                      :asset-path "/js/out"
-                      :output-to "target/cljsbuild/public/js/app.js"
-                      :output-dir "target/cljsbuild/public/js/out"
-                      :source-map true
-                      :optimizations :none
-                      :pretty-print true}}}}
-                  
-                  
-                  
-                  :doo {:build "test"}
-                  :source-paths ["env/dev/clj"]
-                  :resource-paths ["env/dev/resources"]
-                  :repl-options {:init-ns user}
-                  :injections [(require 'pjstadig.humane-test-output)
-                               (pjstadig.humane-test-output/activate!)]}
-   :project/test {:resource-paths ["env/test/resources"]
-                  :cljsbuild
-                  {:builds
-                   {:test
-                    {:source-paths ["src/cljc" "src/cljs" "test/cljs"]
-                     :compiler
-                     {:output-to "target/test.js"
-                      :main "picture-gallery.doo-runner"
-                      :optimizations :whitespace
-                      :pretty-print true}}}}}
-                  
+   :project/dev   {:dependencies   [[prone "1.1.4"]
+                                    [ring/ring-mock "0.3.1"]
+                                    [ring/ring-devel "1.6.2"]
+                                    [pjstadig/humane-test-output "0.8.2"]
+                                    [binaryage/devtools "0.9.4"]
+                                    [com.cemerick/piggieback "0.2.2"]
+                                    [doo "0.1.7"]
+                                    [figwheel-sidecar "0.5.13"]]
+                   :plugins        [[com.jakemccrary/lein-test-refresh "0.19.0"]
+                                    [lein-doo "0.1.7"]
+                                    [lein-figwheel "0.5.13"]
+                                    [org.clojure/clojurescript "1.9.908"]]
+                   :cljsbuild
+                                   {:builds
+                                    {:app
+                                     {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
+                                      :figwheel     {:on-jsload "picture-gallery.core/mount-components"}
+                                      :compiler
+                                                    {:main          "picture-gallery.app"
+                                                     :asset-path    "/js/out"
+                                                     :output-to     "target/cljsbuild/public/js/app.js"
+                                                     :output-dir    "target/cljsbuild/public/js/out"
+                                                     :source-map    true
+                                                     :optimizations :none
+                                                     :pretty-print  true}}}}
 
-   :profiles/dev {}
+
+
+                   :doo            {:build "test"}
+                   :source-paths   ["env/dev/clj"]
+                   :resource-paths ["env/dev/resources"]
+                   :repl-options   {:init-ns user}
+                   :injections     [(require 'pjstadig.humane-test-output)
+                                    (pjstadig.humane-test-output/activate!)]}
+   :project/test  {:resource-paths ["env/test/resources"]
+                   :cljsbuild
+                                   {:builds
+                                    {:test
+                                     {:source-paths ["src/cljc" "src/cljs" "test/cljs"]
+                                      :compiler
+                                                    {:output-to     "target/test.js"
+                                                     :main          "picture-gallery.doo-runner"
+                                                     :optimizations :whitespace
+                                                     :pretty-print  true}}}}}
+
+
+   :profiles/dev  {}
    :profiles/test {}})
