@@ -15,4 +15,4 @@ figwheel_server.log
 *.jpg
 *.iml
 data/
-resources/public/js/
+resources/public/js/out
