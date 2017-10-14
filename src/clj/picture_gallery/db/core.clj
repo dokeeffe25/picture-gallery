@@ -1,11 +1,11 @@
 (ns picture-gallery.db.core
   (:require
-   [cheshire.core :refer [generate-string parse-string]]
-   [clj-time.jdbc]
-   [clojure.java.jdbc :as jdbc]
-   [conman.core :as conman]
-   [picture-gallery.config :refer [env]]
-   [mount.core :refer [defstate]])
+    [cheshire.core :refer [generate-string parse-string]]
+    [clj-time.jdbc]
+    [clojure.java.jdbc :as jdbc]
+    [conman.core :as conman]
+    [picture-gallery.config :refer [env]]
+    [mount.core :refer [defstate]])
   (:import org.postgresql.util.PGobject
            java.sql.Array
            clojure.lang.IPersistentMap
@@ -16,8 +16,8 @@
 
 
 (defstate ^:dynamic *db*
-           :start (conman/connect! {:jdbc-url (env :database-url)})
-           :stop (conman/disconnect! *db*))
+          :start (conman/connect! {:jdbc-url (env :database-url)})
+          :stop (conman/disconnect! *db*))
 
 
 (conman/bind-connection *db* "sql/queries.sql")
@@ -38,9 +38,9 @@
 
 
 (defn to-pg-json [value]
-      (doto (PGobject.)
-            (.setType "jsonb")
-            (.setValue (generate-string value))))
+  (doto (PGobject.)
+    (.setType "jsonb")
+    (.setValue (generate-string value))))
 
 
 (extend-type clojure.lang.IPersistentVector
@@ -59,3 +59,9 @@
   (sql-value [value] (to-pg-json value))
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
+
+
+(defn delete-account! [id]
+  (conman/with-transaction [*db*]
+                           (delete-user! {:id id})
+                           (delete-user-images! {:owner id})))
