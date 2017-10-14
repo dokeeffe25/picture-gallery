@@ -50,6 +50,16 @@ SELECT s.*
 FROM summary s
 WHERE s.rk = 1
 
+-- :name delete-user! :! :n
+-- :doc deletes the user account
+DELETE FROM users
+WHERE id = :id
+
+-- :name delete-user-images! :! :n
+-- :doc deletes all images for the specified user
+DELETE FROM files
+WHERE owner = :owner
+
 -- :name delete-file! :! :n
 -- :doc deletes the file with the given name and owner
 DELETE FROM files

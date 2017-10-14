@@ -99,4 +99,6 @@
     :middleware [api.upload/wrap-multipart-params]
     :summary "handles image upload"
     :return Result
-    (upload/save-image! (:identity req) file)))
+    (upload/save-image! (:identity req) file))
+  (DELETE "/account" {:keys [identity]}
+    (auth/delete-account! identity)))

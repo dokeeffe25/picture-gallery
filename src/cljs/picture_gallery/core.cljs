@@ -20,15 +20,34 @@
     [session-modal]))
 
 
+(defn account-actions [id]
+  (let [expanded? (reagent/atom false)]
+    (fn []
+      [:div.dropdown
+       {:class    (when @expanded? "open")
+        :on-click #(swap! expanded? not)}
+       [:button.btn.btn-secondary.dropdown-toggle
+        {:type :button}
+        [:span.glyphicon.glyphicon-user] " " id [:span.caret]]
+       [:div.dropdown-menu.user-actions
+        [:a.dropdown-item.btn
+         {:on-click
+          #(session/put!
+             :modal registration/delete-account-modal)}
+         "delete account"]
+        [:a.dropdown-item.btn
+         {:on-click
+          #(ajax/POST
+             "/logout"
+             {:handler (fn [] (session/remove! :identity))})}
+         "sign out"]]])))
+
+
 (defn user-menu []
   (if-let [id (session/get :identity)]
     [:ul.nav.navbar-nav.pull-right
      [:li.nav-item [upload/upload-button]]
-     [:li.nav-item
-      [:a.dropdown-item.btn
-       {:on-click #(ajax/POST "/logout"
-                              {:handler (fn [] (session/remove! :identity))})}
-       [:i.fa.fa-user] " " id " | sign out"]]]
+     [:li.nav-item [account-actions id]]]
     [:ul.nav.navbar-nav.pull-right
      [:li.nav-item [login/login-button]]
      [:li.nav-item [registration/registration-button]]]))

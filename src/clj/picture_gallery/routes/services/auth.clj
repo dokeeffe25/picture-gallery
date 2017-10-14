@@ -63,3 +63,10 @@
   (-> {:result :ok}
       http-response/ok
       (assoc :session nil)))
+
+
+(defn delete-account! [id]
+  (db/delete-account! id)
+  (-> {:result :ok}
+      http-response/ok
+      (assoc :session nil)))
