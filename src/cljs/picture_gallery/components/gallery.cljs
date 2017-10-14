@@ -23,6 +23,34 @@
     i))
 
 
+(defn delete-image! [name]
+  (ajax/DELETE (str "/image/" name)
+               {:handler #(do
+                            (session/update-in!
+                              [:thumbnail-links]
+                              (fn [links]
+                                (remove
+                                  (fn [link] (= name (:name link)))
+                                  links)))
+                            (session/remove! :modal))}))
+
+
+(defn delete-image-button [owner name]
+  (session/put!
+    :modal
+    (fn []
+      [common/modal
+       [:h2 "Remove " name "?"]
+       [:div [:img {:src (str "/gallery/" owner "/" name)}]]
+       [:div
+        [:button.btn.btn-primary
+         {:on-click #(delete-image! name)}
+         "Delete"]
+        [:button.btn.btn-danger
+         {:on-click #(session/remove! :modal)}
+         "Cancel"]]])))
+
+
 (defn nav-link [page i]
   [:li.page-item>a.page-link.btn.btn-primary
    {:on-click #(reset! page i)
@@ -56,13 +84,18 @@
 
 
 (defn thumb-link [{:keys [owner name]}]
-  [:div.col-sm-4>img
-   {:src      (str js/context "/gallery/" owner "/" name)
-    :on-click #(session/put!
-                 :modal
-                 (image-modal
-                   (str js/context "/gallery/" owner "/"
-                        (s/replace name #"thumb_" ""))))}])
+  [:div.col-sm-4
+   [:img
+    {:src      (str js/context "/gallery/" owner "/" name)
+     :on-click #(session/put!
+                  :modal
+                  (image-modal
+                    (str js/context "/gallery/" owner "/"
+                         (s/replace name #"thumb_" ""))))}]
+   (when (= (session/get :identity) owner)
+     [:div.text-xs-center>div.btn.btn-danger
+      {:on-click #(delete-image-button owner name)}
+      [:i.fa.fa-times]])])
 
 
 (defn gallery [links]
