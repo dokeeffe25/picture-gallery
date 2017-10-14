@@ -5,6 +5,7 @@
             [markdown.core :refer [md->html]]
             [picture-gallery.ajax :refer [load-interceptors!]]
             [picture-gallery.components.common :as common]
+            [picture-gallery.components.gallery :as gallery]
             [picture-gallery.components.login :as login]
             [picture-gallery.components.registration :as registration]
             [picture-gallery.components.upload :as upload]
@@ -26,7 +27,7 @@
      [:li.nav-item
       [:a.dropdown-item.btn
        {:on-click #(ajax/POST "/logout"
-                       {:handler (fn [] (session/remove! :identity))})}
+                              {:handler (fn [] (session/remove! :identity))})}
        [:i.fa.fa-user] " " id " | sign out"]]]
     [:ul.nav.navbar-nav.pull-right
      [:li.nav-item [login/login-button]]
@@ -37,7 +38,7 @@
   [:li.nav-item
    {:class (when (= page (session/get :page)) "active")}
    [:a.nav-link
-    {:href uri
+    {:href     uri
      :on-click #(reset! collapsed? true)} title]])
 
 
@@ -72,8 +73,9 @@
 
 
 (def pages
-  {:home #'home-page
-   :about #'about-page})
+  {:home    #'home-page
+   :about   #'about-page
+   :gallery #'gallery/gallery-page})
 
 
 (defn page []
@@ -88,11 +90,16 @@
 
 
 (secretary/defroute "/" []
-  (session/put! :page :home))
+                    (session/put! :page :home))
 
 
 (secretary/defroute "/about" []
-  (session/put! :page :about))
+                    (session/put! :page :about))
+
+
+(secretary/defroute "/gallery/:owner" [owner]
+                    (gallery/fetch-gallery-thumbs! owner)
+                    (session/put! :page :gallery))
 
 
 ;; -------------------------
@@ -100,11 +107,11 @@
 ;; must be called after routes have been defined
 (defn hook-browser-navigation! []
   (doto (History.)
-        (events/listen
-          HistoryEventType/NAVIGATE
-          (fn [event]
-              (secretary/dispatch! (.-token event))))
-        (.setEnabled true)))
+    (events/listen
+      HistoryEventType/NAVIGATE
+      (fn [event]
+        (secretary/dispatch! (.-token event))))
+    (.setEnabled true)))
 
 
 ;; -------------------------
