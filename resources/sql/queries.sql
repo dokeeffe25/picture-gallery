@@ -6,7 +6,8 @@ VALUES (:id, :pass)
 
 -- :name get-user :? :1
 -- :doc retrieve the user given the id
-SELECT * FROM users
+SELECT *
+FROM users
 WHERE id = :id
 
 -- :name delete-user! :! :n
@@ -22,12 +23,29 @@ VALUES (:owner, :type, :name, :data)
 
 -- :name list-thumbnails
 -- :doc selects thumbnail names for the given gallery owner
-SELECT owner, name FROM files
+SELECT
+  owner,
+  name
+FROM files
 WHERE owner = :owner
-AND name LIKE 'thumb\_%'
+      AND name LIKE 'thumb\_%'
 
 -- :name get-image :? :1
 -- :doc retrieve image data by name
-SELECT type, data FROM files
+SELECT
+  type,
+  data
+FROM files
 WHERE name = :name
-AND owner = :owner
+      AND owner = :owner
+
+-- :name select-gallery-previews :? :*
+-- selects a thumbnail for each user gallery
+WITH summary AS (
+SELECT f.owner, f.name,
+ROW_NUMBER() OVER ( PARTITION BY f.owner
+ORDER BY f.name DESC ) AS rk
+FROM files f WHERE NAME LIKE 'thumb\_%')
+SELECT s.*
+FROM summary s
+WHERE s.rk = 1

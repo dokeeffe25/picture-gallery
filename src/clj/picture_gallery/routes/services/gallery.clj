@@ -16,3 +16,7 @@
 
 (defn list-thumbnails [owner]
   (http-response/ok (db/list-thumbnails {:owner owner})))
+
+
+(defn list-galleries []
+  (http-response/ok (db/select-gallery-previews)))
